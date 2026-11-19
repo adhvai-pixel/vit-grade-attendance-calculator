@@ -91,7 +91,6 @@
       <header class="hero">
         <p class="eyebrow">For VIT students</p>
         <h1>VITCalc</h1>
-        <p class="lede">Semester GPA, cumulative CGPA, and attendance. On this device, for the 10-point scale.</p>
       </header>
       <noscript>
         <p class="noscript">VITCalc needs JavaScript. It still runs only in this browser. Nothing is uploaded.</p>
@@ -100,7 +99,6 @@
       <section class="panel" id="panel-gpa" role="tabpanel" aria-labelledby="tab-gpa">
         <div class="panel-intro">
           <h2>Semester GPA</h2>
-          <p>Weight every graded course by its credits. E is 5 points and F is 0, and both stay in the average.</p>
         </div>
         <div class="split">
           <section class="card editor-card">
@@ -118,7 +116,6 @@
               <span>Category</span>
               <span>Grade</span>
               <span>Credits</span>
-              <span>Points</span>
               <span></span>
             </div>
             <div id="course-list"></div>
@@ -146,7 +143,6 @@
               <div class="result-copy">
                 <p class="eyebrow">Semester GPA</p>
                 <p class="standing" id="gpa-label">Add grades</p>
-                <p class="formula">GPA = sum of (grade points x credits) / sum of credits</p>
               </div>
             </div>
             <dl class="stats">
@@ -163,7 +159,6 @@
                 <dd id="gpa-courses">0</dd>
               </div>
             </dl>
-            <p class="expression" id="gpa-expression">Grade a course to weight it.</p>
             <p class="sr-only" id="gpa-live" role="status"></p>
           </section>
         </div>
@@ -365,7 +360,6 @@
               <li data-grade="F"><b>F</b><span>0</span></li>
             </ol>
             <ul class="rules">
-              <li>GPA = sum of (grade points x credits) / sum of credits.</li>
               <li>CGPA = (previous CGPA x previous credits + current GPA x current credits) / total credits.</li>
               <li>Attendance uses your minimum. It starts at 75%.</li>
             </ul>
@@ -436,10 +430,6 @@
           <option>20</option>
         </select>
       </label>
-      <div class="product-field">
-        <span class="field-label">Points</span>
-        <p class="row-product">&mdash;</p>
-      </div>
       <button type="button" class="icon-btn" data-action="remove">
         <i class="fa-solid fa-trash" aria-hidden="true"></i>
       </button>
