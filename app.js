@@ -364,27 +364,10 @@
     writeJSON(GPA_KEY, { v: 1, rows: rows });
   }
 
-  function paintProduct(article, row) {
-    var slot = article.querySelector(".row-product");
-    var points = pointsFor(row.grade);
-    var credits = Number(row.credits);
-    if (points == null || CREDIT_VALUES.indexOf(String(row.credits)) === -1) {
-      slot.textContent = "\u2014";
-      slot.classList.remove("is-set");
-      delete article.dataset.points;
-      return;
-    }
-    var weighted = points * credits;
-    slot.textContent = formatTrim(points) + " x " + formatTrim(credits) + " = " + formatTrim(weighted);
-    slot.classList.add("is-set");
-    article.dataset.points = String(weighted);
-  }
-
   function computeGpa() {
     var sumPoints = 0;
     var sumCredits = 0;
     var count = 0;
-    var parts = [];
     rows.forEach(function (row) {
       var points = pointsFor(row.grade);
       if (points == null || CREDIT_VALUES.indexOf(String(row.credits)) === -1) return;
@@ -392,15 +375,13 @@
       sumPoints += points * credits;
       sumCredits += credits;
       count += 1;
-      parts.push(formatTrim(points) + " x " + formatTrim(credits));
     });
     if (count === 0 || sumCredits <= 0) return null;
     return {
       gpa: sumPoints / sumCredits,
       sumPoints: sumPoints,
       sumCredits: sumCredits,
-      count: count,
-      expression: parts.join(" + ") + " = " + formatTrim(sumPoints) + " / " + formatTrim(sumCredits)
+      count: count
     };
   }
 
@@ -418,7 +399,6 @@
     document.getElementById("gpa-credits").textContent = result ? formatTrim(result.sumCredits) : "0";
     document.getElementById("gpa-points").textContent = result ? formatTrim(result.sumPoints) : "0";
     document.getElementById("gpa-courses").textContent = result ? String(result.count) : "0";
-    document.getElementById("gpa-expression").textContent = result ? result.expression : "Grade a course to weight it.";
     document.getElementById("gpa-card").setAttribute("data-state", resultState(shown));
     paintRing("gpa-ring", result ? result.gpa : null, shown);
     document.getElementById("gpa-live").textContent = result
@@ -445,20 +425,17 @@
       credits.setAttribute("aria-label", "Credits for course " + number);
       var remove = article.querySelector('[data-action="remove"]');
       remove.setAttribute("aria-label", "Remove course " + number);
-      paintProduct(article, row);
       category.addEventListener("change", function () {
         row.category = category.value;
         saveGpa();
       });
       grade.addEventListener("change", function () {
         row.grade = grade.value;
-        paintProduct(article, row);
         saveGpa();
         renderGpaResult();
       });
       credits.addEventListener("change", function () {
         row.credits = credits.value;
-        paintProduct(article, row);
         saveGpa();
         renderGpaResult();
       });

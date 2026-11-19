@@ -629,8 +629,7 @@ legend {
   grid-template-areas:
     "kicker remove"
     "cat cat"
-    "grade credits"
-    "prod prod";
+    "grade credits";
   gap: 10px;
   align-items: end;
   padding: 12px;
@@ -649,29 +648,6 @@ legend {
 .field.category { grid-area: cat; }
 .field.grade { grid-area: grade; }
 .field.credits { grid-area: credits; }
-
-.product-field {
-  grid-area: prod;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.row-product {
-  margin: 0;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-
-.row-product.is-set {
-  color: var(--ink);
-  font-weight: 700;
-}
 
 .course > .icon-btn {
   grid-area: remove;
@@ -999,11 +975,11 @@ legend {
 
 @media (min-width: 880px) {
   .course {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.75fr) minmax(11rem, 0.9fr);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.75fr);
     grid-template-areas:
-      "kicker kicker remove"
-      "cat cat cat"
-      "grade credits prod";
+      "kicker remove"
+      "cat cat"
+      "grade credits";
     gap: 10px 12px;
   }
 
