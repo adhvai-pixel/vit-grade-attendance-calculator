@@ -1,410 +1,521 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VIT Grade Calculator</title>
-  <meta name="description" content="Free VIT Grade & CGPA Calculator – fast, accurate, and designed for VIT students." />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VITCalc - GPA, CGPA, and attendance</title>
+  <meta name="description" content="Private VIT calculator for semester GPA, CGPA, and attendance. The absolute scale includes E at 5 points and F at 0. Everything stays in this browser.">
+  <meta name="theme-color" content="#f3efe6">
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var choice = "system";
+      try {
+        var stored = localStorage.getItem("vitcalc.theme");
+        if (stored === "light" || stored === "dark" || stored === "system") choice = stored;
+      } catch (err) {}
+      var dark = false;
+      try {
+        dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      } catch (err) {}
+      var theme = choice === "system" ? (dark ? "dark" : "light") : choice;
+      root.setAttribute("data-theme", theme);
+      root.setAttribute("data-theme-choice", choice);
+      var tabs = ["gpa", "cgpa", "attendance", "about"];
+      var tab = "gpa";
+      var hash = (location.hash || "").replace("#", "");
+      if (tabs.indexOf(hash) !== -1) tab = hash;
+      else {
+        try {
+          var savedTab = sessionStorage.getItem("vitcalc.tab");
+          if (tabs.indexOf(savedTab) !== -1) tab = savedTab;
+        } catch (err) {}
+      }
+      root.setAttribute("data-tab", tab);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f5c50'/%3E%3Cpath d='M16 7.5a8.5 8.5 0 1 1-6.4 3.1' fill='none' stroke='%23f4fbf8' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
 </head>
 <body>
-
-  <!-- ░░ NAVBAR ░░ -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-brand" onclick="scrollToTop()">
-      <div class="brand-icon">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="20" fill="url(#g1)"/>
-          <path d="M10 26 L20 14 L30 26" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 26 L20 18 L26 26" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>
-          <defs><linearGradient id="g1" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6c63ff"/><stop offset="1" stop-color="#3ecfcf"/></linearGradient></defs>
+  <a class="skip" href="#main">Skip to calculator</a>
+  <header class="top">
+    <div class="wrap top-bar">
+      <a class="brand" id="brand" href="#gpa">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <path d="M16 5.2a10.8 10.8 0 0 1 8.6 4.3" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
         </svg>
+        <span>VITCalc</span>
+      </a>
+      <div class="theme" id="theme-group" role="radiogroup" aria-label="Color theme">
+        <button type="button" role="radio" data-choice="light" aria-checked="false" aria-label="Light theme">
+          <i class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
+        <button type="button" role="radio" data-choice="dark" aria-checked="false" aria-label="Dark theme">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </button>
+        <button type="button" role="radio" data-choice="system" aria-checked="false" aria-label="Match system theme">
+          <i class="fa-solid fa-desktop" aria-hidden="true"></i>
+        </button>
       </div>
-      <span class="brand-name"><span class="accent">VIT</span>Calc</span>
     </div>
-
-    <div class="nav-tabs" id="navTabs">
-      <button class="nav-tab active" data-tab="gpa" onclick="switchTab('gpa')">
-        <i class="fas fa-chart-bar"></i><span>GPA</span>
-      </button>
-      <button class="nav-tab" data-tab="cgpa" onclick="switchTab('cgpa')">
-        <i class="fas fa-graduation-cap"></i><span>CGPA</span>
-      </button>
-      <button class="nav-tab" data-tab="attendance" onclick="switchTab('attendance')">
-        <i class="fas fa-calendar-check"></i><span>Attendance</span>
-      </button>
-      <button class="nav-tab" data-tab="about" onclick="switchTab('about')">
-        <i class="fas fa-users"></i><span>About</span>
-      </button>
+    <div class="wrap tabs-wrap">
+      <div class="tablist" id="tablist" role="tablist" aria-label="Calculator sections">
+        <button type="button" class="tab" id="tab-gpa" role="tab" aria-controls="panel-gpa" aria-selected="false" tabindex="-1" data-tab="gpa">
+          <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+          <span>GPA</span>
+        </button>
+        <button type="button" class="tab" id="tab-cgpa" role="tab" aria-controls="panel-cgpa" aria-selected="false" tabindex="-1" data-tab="cgpa">
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          <span>CGPA</span>
+        </button>
+        <button type="button" class="tab" id="tab-attendance" role="tab" aria-controls="panel-attendance" aria-selected="false" tabindex="-1" data-tab="attendance">
+          <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
+          <span>Attendance</span>
+        </button>
+        <button type="button" class="tab" id="tab-about" role="tab" aria-controls="panel-about" aria-selected="false" tabindex="-1" data-tab="about">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <span>About</span>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <div class="nav-actions">
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <i class="fas fa-sun" id="themeIcon"></i>
-      </button>
+  <main id="main">
+    <div class="wrap">
+      <header class="hero">
+        <p class="eyebrow">For VIT students</p>
+        <h1>VITCalc</h1>
+        <p class="lede">Semester GPA, cumulative CGPA, and attendance. On this device, for the 10-point scale.</p>
+      </header>
+      <noscript>
+        <p class="noscript">VITCalc needs JavaScript. It still runs only in this browser. Nothing is uploaded.</p>
+      </noscript>
+
+      <section class="panel" id="panel-gpa" role="tabpanel" aria-labelledby="tab-gpa">
+        <div class="panel-intro">
+          <h2>Semester GPA</h2>
+          <p>Weight every graded course by its credits. E is 5 points and F is 0, and both stay in the average.</p>
+        </div>
+        <div class="split">
+          <section class="card editor-card">
+            <h3>Courses</h3>
+            <ol class="scale" id="grade-scale" aria-label="VIT grade scale: S 10, A 9, B 8, C 7, D 6, E 5, F 0">
+              <li data-grade="S"><b>S</b><span>10</span></li>
+              <li data-grade="A"><b>A</b><span>9</span></li>
+              <li data-grade="B"><b>B</b><span>8</span></li>
+              <li data-grade="C"><b>C</b><span>7</span></li>
+              <li data-grade="D"><b>D</b><span>6</span></li>
+              <li data-grade="E"><b>E</b><span>5</span></li>
+              <li data-grade="F"><b>F</b><span>0</span></li>
+            </ol>
+            <div class="course-head" aria-hidden="true">
+              <span>Category</span>
+              <span>Grade</span>
+              <span>Credits</span>
+              <span>Points</span>
+              <span></span>
+            </div>
+            <div id="course-list"></div>
+            <p id="course-empty" class="hint" hidden>No courses yet. Add one to start.</p>
+            <div class="actions">
+              <button type="button" class="btn primary" id="add-course">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span>Add course</span>
+              </button>
+              <button type="button" class="btn" id="reset-gpa">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                <span class="btn-label">Reset</span>
+              </button>
+            </div>
+          </section>
+          <section class="card result-card" id="gpa-card" data-state="idle" aria-label="Semester GPA result">
+            <div class="result-top">
+              <div class="ring-wrap">
+                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+                  <circle class="ring-value" id="gpa-ring" cx="60" cy="60" r="52" pathLength="100" transform="rotate(-90 60 60)"></circle>
+                </svg>
+                <p class="score" id="gpa-value">&mdash;</p>
+              </div>
+              <div class="result-copy">
+                <p class="eyebrow">Semester GPA</p>
+                <p class="standing" id="gpa-label">Add grades</p>
+                <p class="formula">GPA = sum of (grade points x credits) / sum of credits</p>
+              </div>
+            </div>
+            <dl class="stats">
+              <div>
+                <dt>Credits</dt>
+                <dd id="gpa-credits">0</dd>
+              </div>
+              <div>
+                <dt>Grade points</dt>
+                <dd id="gpa-points">0</dd>
+              </div>
+              <div>
+                <dt>Courses</dt>
+                <dd id="gpa-courses">0</dd>
+              </div>
+            </dl>
+            <p class="expression" id="gpa-expression">Grade a course to weight it.</p>
+            <p class="sr-only" id="gpa-live" role="status"></p>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-cgpa" role="tabpanel" aria-labelledby="tab-cgpa">
+        <div class="panel-intro">
+          <h2>Cumulative CGPA</h2>
+          <p>Credit-weight your previous CGPA with this semester. Letter points use the same scale, including E at 5.</p>
+        </div>
+        <div class="split">
+          <section class="card editor-card">
+            <h3>Records</h3>
+            <ol class="scale" id="cgpa-scale" aria-label="VIT grade scale: S 10, A 9, B 8, C 7, D 6, E 5, F 0">
+              <li data-grade="S"><b>S</b><span>10</span></li>
+              <li data-grade="A"><b>A</b><span>9</span></li>
+              <li data-grade="B"><b>B</b><span>8</span></li>
+              <li data-grade="C"><b>C</b><span>7</span></li>
+              <li data-grade="D"><b>D</b><span>6</span></li>
+              <li data-grade="E"><b>E</b><span>5</span></li>
+              <li data-grade="F"><b>F</b><span>0</span></li>
+            </ol>
+            <fieldset>
+              <legend>Previous record</legend>
+              <div class="form-grid two">
+                <label class="field">
+                  <span class="field-label">Previous CGPA</span>
+                  <input id="prev-cgpa" type="number" inputmode="decimal" min="0" max="10" step="0.01" autocomplete="off" aria-describedby="cgpa-scale">
+                </label>
+                <label class="field">
+                  <span class="field-label">Previous credits</span>
+                  <input id="prev-credits" type="number" inputmode="decimal" min="0" step="0.5" autocomplete="off">
+                </label>
+              </div>
+              <p class="hint">First semester: enter 0 previous credits.</p>
+            </fieldset>
+            <fieldset>
+              <legend>This semester</legend>
+              <div class="form-grid two">
+                <label class="field">
+                  <span class="field-label">Current GPA</span>
+                  <input id="current-gpa" type="number" inputmode="decimal" min="0" max="10" step="0.01" autocomplete="off" aria-describedby="cgpa-scale">
+                </label>
+                <label class="field">
+                  <span class="field-label">Current credits</span>
+                  <input id="current-credits" type="number" inputmode="decimal" min="0" step="0.5" autocomplete="off">
+                </label>
+              </div>
+            </fieldset>
+            <details class="planner" id="planner">
+              <summary>
+                <i class="fa-solid fa-bullseye" aria-hidden="true"></i>
+                <span>Plan a target CGPA</span>
+              </summary>
+              <div class="planner-grid">
+                <label class="field">
+                  <span class="field-label">Target CGPA</span>
+                  <input id="target-cgpa" type="number" inputmode="decimal" min="0" max="10" step="0.01" autocomplete="off">
+                </label>
+                <label class="field">
+                  <span class="field-label">Semesters left</span>
+                  <input id="semesters-left" type="number" inputmode="numeric" min="0" step="1" autocomplete="off">
+                </label>
+                <label class="field">
+                  <span class="field-label">Avg credits / sem</span>
+                  <input id="avg-credits" type="number" inputmode="decimal" min="0" step="0.5" autocomplete="off">
+                </label>
+              </div>
+              <p class="hint">Future credits are semesters left times the average credits. Above 10 is unreachable. Below 0 means you already beat the target.</p>
+              <p class="expression" id="planner-result">Add a target CGPA, semesters left, and average credits per semester.</p>
+            </details>
+            <div class="actions">
+              <button type="button" class="btn" id="reset-cgpa">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                <span class="btn-label">Reset</span>
+              </button>
+            </div>
+          </section>
+          <section class="card result-card" id="cgpa-card" data-state="idle" aria-label="CGPA result">
+            <div class="result-top">
+              <div class="ring-wrap">
+                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+                  <circle class="ring-value" id="cgpa-ring" cx="60" cy="60" r="52" pathLength="100" transform="rotate(-90 60 60)"></circle>
+                </svg>
+                <p class="score" id="cgpa-value">&mdash;</p>
+              </div>
+              <div class="result-copy">
+                <p class="eyebrow">CGPA</p>
+                <p class="standing" id="cgpa-label">Enter both terms</p>
+                <p class="formula">CGPA = (previous CGPA x previous credits + current GPA x current credits) / total credits</p>
+              </div>
+            </div>
+            <dl class="stats stats-two">
+              <div>
+                <dt>Credits</dt>
+                <dd id="cgpa-credits">&mdash;</dd>
+              </div>
+              <div>
+                <dt>Grade points</dt>
+                <dd id="cgpa-points">&mdash;</dd>
+              </div>
+            </dl>
+            <p class="expression" id="cgpa-expression">Enter previous CGPA, previous credits, current GPA, and current credits.</p>
+            <p class="sr-only" id="cgpa-live" role="status"></p>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-attendance" role="tabpanel" aria-labelledby="tab-attendance">
+        <div class="panel-intro">
+          <h2>Attendance</h2>
+          <p>See how many classes you can still miss, or how many you must attend in a row. The default line is 75%.</p>
+        </div>
+        <div class="attend-layout">
+          <section class="card">
+            <h3>Overall</h3>
+            <p class="eyebrow" id="overall-status">Add classes</p>
+            <div class="duo">
+              <div>
+                <p class="score" id="overall-percent">&mdash;</p>
+                <p class="score-label">Attendance</p>
+              </div>
+              <div>
+                <p class="score" id="overall-count">&mdash;</p>
+                <p class="score-label" id="overall-count-label">Classes</p>
+              </div>
+            </div>
+            <div class="meter" id="overall-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Overall attendance percent">
+              <span class="meter-fill" id="overall-fill"></span>
+              <span class="meter-min" id="overall-min-mark"></span>
+            </div>
+            <p class="expression" id="overall-detail">Enter total and attended classes.</p>
+            <div class="form-grid two">
+              <label class="field">
+                <span class="field-label">Total classes</span>
+                <input id="overall-total" type="number" inputmode="numeric" min="0" step="1" autocomplete="off" aria-describedby="overall-detail">
+              </label>
+              <label class="field">
+                <span class="field-label">Attended</span>
+                <input id="overall-attended" type="number" inputmode="numeric" min="0" step="1" autocomplete="off" aria-describedby="overall-detail">
+              </label>
+              <label class="field">
+                <span class="field-label">Minimum %</span>
+                <input id="overall-min" type="number" inputmode="decimal" min="0" max="100" step="1" value="75" autocomplete="off" aria-describedby="overall-detail">
+              </label>
+            </div>
+            <details class="math">
+              <summary>How the count is calculated</summary>
+              <p>If attended / total is at least the minimum, classes you can miss = floor((attended - minimum / 100 x total) / (minimum / 100)).</p>
+              <p>If you are short, classes to attend in a row = ceil((minimum x total - 100 x attended) / (100 - minimum)).</p>
+            </details>
+          </section>
+          <section class="card">
+            <h3>By subject</h3>
+            <p class="hint">Same rule for each subject. Attended classes cannot be more than the total.</p>
+            <div id="subject-list"></div>
+            <p id="subject-empty" class="hint" hidden>No subjects yet. Add one to track a class.</p>
+            <div class="actions">
+              <button type="button" class="btn primary" id="add-subject">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span>Add subject</span>
+              </button>
+              <button type="button" class="btn" id="reset-attendance">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                <span class="btn-label">Reset</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about">
+        <div class="panel-intro">
+          <h2>About</h2>
+          <p>Student-built for VIT. Private, on this device, with no ads and no account.</p>
+        </div>
+        <div class="about-grid">
+          <article class="card">
+            <h3><i class="fa-solid fa-lock" aria-hidden="true"></i> On this device</h3>
+            <ul class="rules">
+              <li>Your courses, CGPA, and attendance stay in local storage in this browser.</li>
+              <li>Nothing is uploaded. There is no account and no server.</li>
+              <li>There are no ads.</li>
+              <li>Reset on a tab clears that saved data. Your theme choice stays.</li>
+            </ul>
+            <p class="hint">VITCalc is an unofficial student project. Check your own regulations for the rules that apply to you.</p>
+          </article>
+          <article class="card">
+            <h3>Grade scale</h3>
+            <p>These are the only letter grades. Absolute points. E is 5. F is 0. Both are counted.</p>
+            <ol class="scale" id="about-scale" aria-label="VIT grade scale: S 10, A 9, B 8, C 7, D 6, E 5, F 0">
+              <li data-grade="S"><b>S</b><span>10</span></li>
+              <li data-grade="A"><b>A</b><span>9</span></li>
+              <li data-grade="B"><b>B</b><span>8</span></li>
+              <li data-grade="C"><b>C</b><span>7</span></li>
+              <li data-grade="D"><b>D</b><span>6</span></li>
+              <li data-grade="E"><b>E</b><span>5</span></li>
+              <li data-grade="F"><b>F</b><span>0</span></li>
+            </ol>
+            <ul class="rules">
+              <li>GPA = sum of (grade points x credits) / sum of credits.</li>
+              <li>CGPA = (previous CGPA x previous credits + current GPA x current credits) / total credits.</li>
+              <li>Attendance uses your minimum. It starts at 75%.</li>
+            </ul>
+          </article>
+        </div>
+        <h3 class="team-heading">Team</h3>
+        <div class="team">
+          <article class="card person">
+            <h4>Adhvai Senthilkumar</h4>
+            <p class="role">Frontend &amp; Logic</p>
+            <div class="socials">
+              <a class="social" href="https://www.instagram.com/adhvai_senthilkumar" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                <span>Instagram</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+              <a class="social" href="https://www.linkedin.com/in/adhvai-s-23021a2a4/" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                <span>LinkedIn</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </div>
+          </article>
+          <article class="card person">
+            <h4>Dhanush</h4>
+            <p class="role">UI Design</p>
+            <div class="socials">
+              <a class="social" href="https://www.instagram.com/ade7_867" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                <span>Instagram</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+              <a class="social" href="https://www.linkedin.com/in/dhanush-h-634513394/" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                <span>LinkedIn</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </div>
+          </article>
+          <article class="card person">
+            <h4>Sathiyan</h4>
+            <p class="role">Backend &amp; QA</p>
+            <div class="socials">
+              <a class="social" href="https://www.instagram.com/iamsaty18" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                <span>Instagram</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+              <a class="social" href="https://www.linkedin.com/in/sathiyan-b-b513b0321/" target="_blank" rel="noopener noreferrer">
+                <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                <span>LinkedIn</span>
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
-  </nav>
-
-  <!-- ░░ HERO BANNER ░░ -->
-  <div class="hero" id="hero">
-    <div class="hero-bg">
-      <div class="hero-orb orb1"></div>
-      <div class="hero-orb orb2"></div>
-      <div class="hero-orb orb3"></div>
-    </div>
-    <div class="hero-content">
-      <p class="hero-label">Built for VIT Students</p>
-      <h1 class="hero-title">Your Academic<br /><em>Edge</em></h1>
-      <p class="hero-sub">Calculate GPA, CGPA &amp; Attendance in seconds. No spreadsheets, no stress.</p>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num" data-target="10">0</span><span class="stat-label">Max GPA</span></div>
-        <div class="stat-sep"></div>
-        <div class="stat"><span class="stat-num" data-target="75">0</span><span class="stat-label">Min Attendance %</span></div>
-        <div class="stat-sep"></div>
-        <div class="stat"><span class="stat-num" data-target="8">0</span><span class="stat-label">Grade Points</span></div>
-      </div>
-      <button class="cta-btn" onclick="switchTab('gpa'); document.getElementById('gpa').scrollIntoView({behavior:'smooth'})">
-        Start Calculating <i class="fas fa-arrow-right"></i>
-      </button>
-    </div>
-    <div class="hero-scroll-hint">
-      <i class="fas fa-chevron-down"></i>
-    </div>
-  </div>
-
-  <!-- ░░ MAIN CONTENT ░░ -->
-  <main class="main-content" id="main">
-
-    <!-- ── GPA TAB ── -->
-    <section class="tab-section active" id="gpa">
-      <div class="section-header">
-        <div class="section-badge"><i class="fas fa-chart-bar"></i></div>
-        <h2 class="section-title">GPA Calculator</h2>
-        <p class="section-desc">Enter your courses for this semester and compute your GPA instantly.</p>
-      </div>
-
-      <div class="card">
-        <div class="grade-ref-bar">
-          <span class="ref-title">Grade Reference</span>
-          <div class="ref-chips">
-            <span class="chip s">S · 10</span>
-            <span class="chip a">A · 9</span>
-            <span class="chip b">B · 8</span>
-            <span class="chip c">C · 7</span>
-            <span class="chip d">D · 6</span>
-            <span class="chip f">F · 0</span>
-          </div>
-        </div>
-
-        <div class="table-header course-row">
-          <span>Course Category</span>
-          <span>Grade</span>
-          <span>Credits</span>
-        </div>
-
-        <div id="courses" class="course-list"></div>
-
-        <div class="card-actions">
-          <button class="btn btn-ghost" onclick="addCourseRow()"><i class="fas fa-plus"></i> Add Course</button>
-          <div class="action-right">
-            <button class="btn btn-secondary" onclick="resetGPA()"><i class="fas fa-undo"></i> Reset</button>
-            <button class="btn btn-primary" onclick="calculateGPA()"><i class="fas fa-calculator"></i> Compute GPA</button>
-          </div>
-        </div>
-
-        <div id="gpaError" class="error-msg hidden"></div>
-        <div id="gpaResult" class="result-display hidden">
-          <div class="result-ring" id="gpaRing">
-            <svg viewBox="0 0 120 120" class="ring-svg">
-              <circle cx="60" cy="60" r="50" class="ring-bg"/>
-              <circle cx="60" cy="60" r="50" class="ring-fill" id="gpaRingFill"/>
-            </svg>
-            <div class="ring-inner">
-              <span class="ring-label">GPA</span>
-              <span class="ring-value" id="gpaValue">–</span>
-            </div>
-          </div>
-          <div class="result-meta">
-            <div class="meta-item"><span class="meta-label">Total Credits</span><span class="meta-val" id="gpaTotalCredits">–</span></div>
-            <div class="meta-item"><span class="meta-label">Grade Points</span><span class="meta-val" id="gpaTotalPoints">–</span></div>
-            <div class="meta-item"><span class="meta-label">Performance</span><span class="meta-val" id="gpaPerf">–</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── CGPA TAB ── -->
-    <section class="tab-section" id="cgpa">
-      <div class="section-header">
-        <div class="section-badge"><i class="fas fa-graduation-cap"></i></div>
-        <h2 class="section-title">CGPA Calculator</h2>
-        <p class="section-desc">Combine your previous record with this semester to see your cumulative GPA.</p>
-      </div>
-
-      <div class="card cgpa-card">
-        <div class="cgpa-grid">
-          <div class="input-field">
-            <label>CGPA (Previous Sems)</label>
-            <div class="field-wrap">
-              <i class="fas fa-history field-icon"></i>
-              <input type="number" id="prevCgpa" placeholder="e.g. 8.75" min="0" max="10" step="0.01" />
-              <span class="field-hint">out of 10</span>
-            </div>
-          </div>
-
-          <div class="input-field">
-            <label>Credits Completed (Previous)</label>
-            <div class="field-wrap">
-              <i class="fas fa-layer-group field-icon"></i>
-              <input type="number" id="prevCredits" placeholder="e.g. 120" min="0" max="300" />
-              <span class="field-hint">credits</span>
-            </div>
-          </div>
-
-          <div class="input-field">
-            <label>Current Semester GPA</label>
-            <div class="field-wrap">
-              <i class="fas fa-chart-line field-icon"></i>
-              <input type="number" id="currentGpa" placeholder="e.g. 9.2" min="0" max="10" step="0.01" />
-              <span class="field-hint">out of 10</span>
-            </div>
-          </div>
-
-          <div class="input-field">
-            <label>Current Semester Credits</label>
-            <div class="field-wrap">
-              <i class="fas fa-coins field-icon"></i>
-              <input type="number" id="currentCredits" placeholder="e.g. 22" min="0" max="50" />
-              <span class="field-hint">credits</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Target CGPA Planner -->
-        <div class="planner-box">
-          <div class="planner-header">
-            <i class="fas fa-bullseye"></i>
-            <span>Target CGPA Planner</span>
-            <span class="planner-optional">optional</span>
-          </div>
-          <div class="planner-row">
-            <div class="input-field">
-              <label>Target CGPA</label>
-              <div class="field-wrap">
-                <i class="fas fa-star field-icon"></i>
-                <input type="number" id="targetCgpa" placeholder="e.g. 9.0" min="0" max="10" step="0.01" />
-              </div>
-            </div>
-            <div class="input-field">
-              <label>Semesters Remaining</label>
-              <div class="field-wrap">
-                <i class="fas fa-hourglass-half field-icon"></i>
-                <input type="number" id="semsRemaining" placeholder="e.g. 4" min="1" max="16" />
-              </div>
-            </div>
-            <div class="input-field">
-              <label>Avg Credits / Sem</label>
-              <div class="field-wrap">
-                <i class="fas fa-balance-scale field-icon"></i>
-                <input type="number" id="avgCreditsPerSem" placeholder="e.g. 22" min="1" max="50" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button class="btn btn-secondary" onclick="resetCGPA()"><i class="fas fa-undo"></i> Reset</button>
-          <button class="btn btn-primary" onclick="calculateCGPA()"><i class="fas fa-calculator"></i> Compute CGPA</button>
-        </div>
-
-        <div id="cgpaError" class="error-msg hidden"></div>
-
-        <div id="cgpaResult" class="result-display cgpa-result hidden">
-          <div class="result-ring" id="cgpaRing">
-            <svg viewBox="0 0 120 120" class="ring-svg">
-              <circle cx="60" cy="60" r="50" class="ring-bg"/>
-              <circle cx="60" cy="60" r="50" class="ring-fill" id="cgpaRingFill"/>
-            </svg>
-            <div class="ring-inner">
-              <span class="ring-label">CGPA</span>
-              <span class="ring-value" id="cgpaValue">–</span>
-            </div>
-          </div>
-          <div class="result-meta">
-            <div class="meta-item"><span class="meta-label">Total Credits</span><span class="meta-val" id="cgpaTotalCredits">–</span></div>
-            <div class="meta-item"><span class="meta-label">Classification</span><span class="meta-val" id="cgpaClass">–</span></div>
-            <div class="meta-item"><span class="meta-label">Total Points</span><span class="meta-val" id="cgpaTotalPoints">–</span></div>
-          </div>
-          <div class="planner-result hidden" id="plannerResult">
-            <div class="planner-result-inner">
-              <i class="fas fa-route"></i>
-              <p id="plannerText"></p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── ATTENDANCE TAB ── -->
-    <section class="tab-section" id="attendance">
-      <div class="section-header">
-        <div class="section-badge"><i class="fas fa-calendar-check"></i></div>
-        <h2 class="section-title">Attendance Calculator</h2>
-        <p class="section-desc">Track your attendance and find out how many classes you can miss — or must attend.</p>
-      </div>
-
-      <div class="card">
-        <!-- Overall Attendance -->
-        <div class="att-section-label"><i class="fas fa-globe"></i> Overall Attendance</div>
-        <div class="att-grid">
-          <div class="input-field">
-            <label>Total Classes Held</label>
-            <div class="field-wrap">
-              <i class="fas fa-school field-icon"></i>
-              <input type="number" id="totalClasses" placeholder="e.g. 60" min="0" />
-            </div>
-          </div>
-          <div class="input-field">
-            <label>Classes Attended</label>
-            <div class="field-wrap">
-              <i class="fas fa-user-check field-icon"></i>
-              <input type="number" id="attendedClasses" placeholder="e.g. 48" min="0" />
-            </div>
-          </div>
-          <div class="input-field">
-            <label>Minimum Required %</label>
-            <div class="field-wrap">
-              <i class="fas fa-percent field-icon"></i>
-              <input type="number" id="minAttendance" placeholder="75" min="0" max="100" value="75" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Subject-wise -->
-        <div class="att-section-label" style="margin-top:28px;"><i class="fas fa-book-open"></i> Subject-wise Tracker</div>
-        <div class="subject-list" id="subjectList"></div>
-        <button class="btn btn-ghost" onclick="addSubject()" style="margin-top:10px;"><i class="fas fa-plus"></i> Add Subject</button>
-
-        <div class="card-actions" style="margin-top:24px;">
-          <button class="btn btn-secondary" onclick="resetAttendance()"><i class="fas fa-undo"></i> Reset</button>
-          <button class="btn btn-primary" onclick="calculateAttendance()"><i class="fas fa-calculator"></i> Calculate</button>
-        </div>
-
-        <div id="attError" class="error-msg hidden"></div>
-        <div id="attResult" class="att-results hidden"></div>
-      </div>
-    </section>
-
-    <!-- ── ABOUT TAB ── -->
-    <section class="tab-section" id="about">
-      <div class="section-header">
-        <div class="section-badge"><i class="fas fa-users"></i></div>
-        <h2 class="section-title">About Us</h2>
-        <p class="section-desc">A student-built tool, for students.</p>
-      </div>
-
-      <div class="card about-card">
-        <p class="about-text">
-          VIT Grade Calculator was born out of frustration with manual grade tracking. We're a small team of VIT students who wanted a fast, accurate, and beautifully designed tool that understands VIT's grading system. No fluff, no ads — just your academic numbers, clearly presented.
-        </p>
-
-        <div class="features-grid">
-          <div class="feature-item">
-            <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-            <h4>Instant Results</h4>
-            <p>No page reloads. Everything computes in real-time.</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-            <h4>Private & Local</h4>
-            <p>Data stays in your browser. Nothing goes to any server.</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
-            <h4>Mobile First</h4>
-            <p>Works great on phone, tablet, and desktop alike.</p>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon"><i class="fas fa-moon"></i></div>
-            <h4>Dark / Light Mode</h4>
-            <p>Follows your system preference, or switch manually.</p>
-          </div>
-        </div>
-
-        <div class="team-section">
-          <h3 class="team-title">The Team</h3>
-          <div class="team-grid">
-            <div class="member-card">
-              <div class="member-avatar">AS</div>
-              <div class="member-info">
-                <h4>Adhvai Senthilkumar</h4>
-                <p>Frontend &amp; Logic</p>
-              </div>
-              <div class="member-socials">
-                <a href="https://instagram.com/adhvai_senthilkumar" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.linkedin.com/in/adhvai-s-23021a2a4/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-card">
-              <div class="member-avatar">DK</div>
-              <div class="member-info">
-                <h4>Dhanush</h4>
-                <p>UI Design</p>
-              </div>
-              <div class="member-socials">
-                <a href="https://instagram.com/ade7_867" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
-                <a href="https://linkedin.com/in/dhanush-h-634513394/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a>
-              </div>
-            </div>
-            <div class="member-card">
-              <div class="member-avatar">SB</div>
-              <div class="member-info">
-                <h4>Sathiyan</h4>
-                <p>Backend &amp; QA</p>
-              </div>
-              <div class="member-socials">
-                <a href="https://instagram.com/iamsaty18" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.linkedin.com/in/sathiyan-b-b513b0321/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- ░░ FOOTER ░░ -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="brand-name"><span class="accent">VIT</span>Calc</span>
-        <p>Making academics less stressful, one calculation at a time.</p>
-      </div>
-      <div class="footer-links">
-        <button onclick="switchTab('gpa')">GPA Calculator</button>
-        <button onclick="switchTab('cgpa')">CGPA Calculator</button>
-        <button onclick="switchTab('attendance')">Attendance</button>
-        <button onclick="switchTab('about')">About</button>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 VITCalc · All Rights Reserved · Built with <i class="fas fa-heart" style="color:#f43f5e;"></i> at VIT</span>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>VITCalc keeps your numbers in this browser. Reset clears the saved tab. Theme is kept.</p>
     </div>
   </footer>
 
-  <!-- Confetti canvas -->
-  <canvas id="confettiCanvas"></canvas>
+  <template id="course-template">
+    <article class="course">
+      <p class="course-kicker"></p>
+      <label class="field category">
+        <span class="field-label">Category</span>
+        <select data-field="category">
+          <option>Discipline Core</option>
+          <option>Discipline Elective</option>
+          <option>Open Elective</option>
+          <option>Ability Enhancement</option>
+          <option>Skill Enhancement</option>
+          <option>Value Added Course</option>
+        </select>
+      </label>
+      <label class="field grade">
+        <span class="field-label">Grade</span>
+        <select data-field="grade" aria-describedby="grade-scale">
+          <option value="">Grade</option>
+          <option value="S" data-points="10">S - 10</option>
+          <option value="A" data-points="9">A - 9</option>
+          <option value="B" data-points="8">B - 8</option>
+          <option value="C" data-points="7">C - 7</option>
+          <option value="D" data-points="6">D - 6</option>
+          <option value="E" data-points="5">E - 5</option>
+          <option value="F" data-points="0">F - 0</option>
+        </select>
+      </label>
+      <label class="field credits">
+        <span class="field-label">Credits</span>
+        <select data-field="credits">
+          <option>0.5</option>
+          <option>1</option>
+          <option>1.5</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+          <option>10</option>
+          <option>20</option>
+        </select>
+      </label>
+      <div class="product-field">
+        <span class="field-label">Points</span>
+        <p class="row-product">&mdash;</p>
+      </div>
+      <button type="button" class="icon-btn" data-action="remove">
+        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+      </button>
+    </article>
+  </template>
 
-  <script src="app.js"></script>
+  <template id="subject-template">
+    <article class="subject">
+      <div class="subject-grid">
+        <label class="field subject-name">
+          <span class="field-label">Subject</span>
+          <input type="text" data-field="name" maxlength="80" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">
+          <span class="field-label">Total</span>
+          <input type="number" data-field="total" min="0" step="1" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="field">
+          <span class="field-label">Attended</span>
+          <input type="number" data-field="attended" min="0" step="1" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="field">
+          <span class="field-label">Minimum %</span>
+          <input type="number" data-field="min" min="0" max="100" step="1" inputmode="decimal" autocomplete="off">
+        </label>
+        <button type="button" class="icon-btn" data-action="remove">
+          <i class="fa-solid fa-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="meter" aria-hidden="true">
+        <span class="meter-fill"></span>
+        <span class="meter-min"></span>
+      </div>
+      <p class="subject-result" data-state="idle"></p>
+    </article>
+  </template>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <script src="app.js" defer></script>
 </body>
 </html>
