@@ -871,9 +871,10 @@ legend {
   margin-top: 4px;
 }
 
-.team {
-  display: grid;
-  gap: 12px;
+.credit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .person h4 {
@@ -987,8 +988,7 @@ legend {
     gap: 8px;
   }
 
-  .about-grid,
-  .team {
+  .about-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
