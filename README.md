@@ -60,10 +60,9 @@ AI-based grade prediction
 Cloud deployment
 
 
-👨‍💻 Team
-Adhvai Senthilkumar – Frontend & Logic
-Dhanush – UI Design
-Sathiyan – Backend & QA
+👨‍💻 Developed by adhvai
+https://adhvai.in
+https://www.linkedin.com/in/adhvai-s-23021a2a4/
 
 📌 Conclusion
 
